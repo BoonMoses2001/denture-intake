@@ -3,243 +3,140 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Submissions Dashboard</title>
+  <title>Patient Intake Form</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4682B4">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    body {
-      background-color: #4682B4;
-      font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 20px;
+    body { background-color: #4682B4; font-family: 'Arial', sans-serif; margin: 0; padding: 20px; }
+    .form-container { background: white; max-width: 1000px; margin: 0 auto; padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
+    h1 { color: #0033A0; font-size: 32px; text-align: center; margin-bottom: 10px; }
+    h2 { color: #0033A0; font-size: 24px; margin-top: 20px; }
+    h3 { color: #0033A0; font-size: 18px; margin-top: 15px; }
+    p.subtitle { text-align: center; font-style: italic; color: #333; font-size: 18px; margin-bottom: 20px; }
+    hr { border: 1px solid #0033A0; margin: 20px 0; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    td { padding: 10px; vertical-align: top; }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"] {
+      width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; margin-top: 5px;
     }
-    .container {
-      background: white;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      color: #0033A0;
-      font-size: 32px;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    h2 {
-      color: #0033A0;
-      font-size: 24px;
-      margin-top: 20px;
-      text-align: center;
-    }
-    p.subtitle {
-      text-align: center;
-      font-style: italic;
-      color: #333;
-      font-size: 18px;
-      margin-bottom: 20px;
-    }
-    hr {
-      border: 1px solid #0033A0;
-      margin: 20px 0;
-    }
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-      margin-top: 5px;
-    }
-    button {
-      background-color: #9933FF;
-      color: white;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      margin: 5px;
-    }
-    button:hover {
-      background-color: #7a29cc;
-    }
-    .error {
-      color: red;
-      font-size: 16px;
-      text-align: center;
-      margin: 10px 0;
-    }
-    .login-form {
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    .hidden {
-      display: none;
-    }
-    .submission-card {
-      background: #f9f9f9;
-      border: 1px solid #0033A0;
-      border-radius: 8px;
-      padding: 15px;
-      margin: 10px;
-      flex: 1 1 300px;
-      max-width: 350px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
-    }
-    .submission-card:hover {
-      transform: translateY(-2px);
-    }
-    .submission-card p {
-      margin: 5px 0;
-      font-size: 18px;
-      color: #333;
-    }
-    .submission-card .label {
-      font-weight: bold;
-      color: #0033A0;
-    }
-    .submissions-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-    }
-    .no-submissions {
-      text-align: center;
-      font-size: 18px;
-      color: #333;
-      margin: 20px 0;
-    }
-    .logout-container {
-      text-align: center;
-      margin-top: 20px;
-    }
+    input[type="checkbox"] { margin-right: 10px; transform: scale(1.5); }
+    input[type="checkbox"] + label { color: #1E90FF; font-size: 16px; }
+    .policy-box { background: #f8f8f8; border: 1px solid #0033A0; border-radius: 5px; padding: 20px; margin: 20px 0; font-size: 16px; line-height: 1.5; }
+    button { background-color: #9933FF; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 18px; cursor: pointer; display: block; margin: 20px auto; }
+    button:hover { background-color: #7a29cc; }
     @media (max-width: 600px) {
-      .container {
-        padding: 20px;
-      }
+      .form-container { padding: 20px; }
       h1 { font-size: 24px; }
       h2 { font-size: 20px; }
-      input[type="text"], input[type="password"] {
-        font-size: 14px;
-        padding: 10px;
-      }
-      button {
-        font-size: 14px;
-        padding: 10px 15px;
-      }
-      .submission-card {
-        flex: 1 1 100%;
-        max-width: 100%;
-      }
+      h3 { font-size: 16px; }
+      input[type="text"], input[type="email"], input[type="tel"], input[type="date"] { font-size: 14px; padding: 10px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="form-container">
     <h1>WestCoast Digital Denture and Implant Center</h1>
     <p class="subtitle">Chris R. Chapman, L.D. & Melanie E. Chapman, L.D.</p>
-    <div id="loginForm" class="login-form">
-      <h2>Staff Login</h2>
-      <form id="authForm">
-        <table>
-          <tr><td>Username:</td><td><input type="text" name="username" placeholder="Enter username" required></td></tr>
-          <tr><td>Password:</td><td><input type="password" name="password" placeholder="Enter password" required></td></tr>
-        </table>
-        <p id="errorMessage" class="error hidden"></p>
-        <button type="submit">Login</button>
-      </form>
-    </div>
-    <div id="dashboardContent" class="hidden">
-      <h2>Submissions Dashboard</h2>
-      <hr>
-      <div id="submissionsContainer" class="submissions-container"></div>
-      <div class="logout-container">
-        <button onclick="logout()">Logout</button>
+    <h2 style="text-align: center;">Patient Intake Form</h2>
+    <hr>
+    <form id="intakeForm">
+      <h2>Personal Information</h2>
+      <table>
+        <tr><td>Full Name:</td><td><input type="text" name="name" placeholder="Enter your full name" required></td></tr>
+        <tr><td>Birthdate:</td><td><input type="date" name="birthdate" placeholder="Select your birthdate"></td></tr>
+        <tr><td>Address:</td><td><input type="text" name="address" placeholder="Enter your address"></td></tr>
+        <tr><td>City:</td><td><input type="text" name="city" placeholder="Enter your city"></td></tr>
+        <tr><td>State:</td><td><input type="text" name="state" placeholder="Enter your state"></td></tr>
+        <tr><td>Zip:</td><td><input type="text" name="zip" placeholder="Enter your zip code"></td></tr>
+        <tr><td>Phone:</td><td><input type="tel" name="phone" placeholder="Enter your phone number"></td></tr>
+        <tr><td>E-Mail:</td><td><input type="email" name="email" placeholder="Enter your email"></td></tr>
+        <tr><td>Occupation/Employer:</td><td><input type="text" name="occupation" placeholder="Enter your occupation or employer"></td></tr>
+        <tr><td>Emergency Contact Name:</td><td><input type="text" name="emergencyContactName" placeholder="Enter emergency contact name"></td></tr>
+        <tr><td>Emergency Contact Phone:</td><td><input type="tel" name="emergencyContactPhone" placeholder="Enter emergency contact phone"></td></tr>
+        <tr><td>Physician Name and Contact:</td><td><input type="text" name="physician" placeholder="Enter physician name and contact"></td></tr>
+      </table>
+      <h2>Insurance Information</h2>
+      <table>
+        <tr><td>Insurance Company:</td><td><input type="text" name="insuranceCompany" placeholder="Enter insurance company"></td></tr>
+        <tr><td>Address:</td><td><input type="text" name="insuranceAddress" placeholder="Enter insurance address"></td></tr>
+        <tr><td>City:</td><td><input type="text" name="insuranceCity" placeholder="Enter insurance city"></td></tr>
+        <tr><td>State:</td><td><input type="text" name="insuranceState" placeholder="Enter insurance state"></td></tr>
+        <tr><td>Zip:</td><td><input type="text" name="insuranceZip" placeholder="Enter insurance zip code"></td></tr>
+      </table>
+      <h2>Dental History</h2>
+      <table>
+        <tr><td>Age of Current Denture:</td><td><input type="text" name="dentureAge" placeholder="Enter age of current denture"></td></tr>
+        <tr><td>Last Dentures Received:</td><td><input type="text" name="lastDentures" placeholder="Enter when last dentures received"></td></tr>
+        <tr><td>Referral Source:</td><td><input type="text" name="referral" placeholder="Enter referral source"></td></tr>
+      </table>
+      <h2>Medical History</h2>
+      <table>
+        <tr><td>Medications:</td><td><input type="text" name="medications" placeholder="List medications"></td></tr>
+        <tr><td><input type="checkbox" name="doctorCare" id="doctorCare" value="Yes"><label for="doctorCare">Under doctor care?</label></td></tr>
+        <tr><td><input type="checkbox" name="teethAppearance" id="teethAppearance" value="Yes"><label for="teethAppearance">Dissatisfied with teeth appearance?</label></td></tr>
+        <tr><td><input type="checkbox" name="chewingDifficulty" id="chewingDifficulty" value="Yes"><label for="chewingDifficulty">Difficulty chewing?</label></td></tr>
+        <tr><td><input type="checkbox" name="slowHealing" id="slowHealing" value="Yes"><label for="slowHealing">Slow-healing sores?</label></td></tr>
+        <tr><td><input type="checkbox" name="mouthOpening" id="mouthOpening" value="Yes"><label for="mouthOpening">Difficulty opening mouth?</label></td></tr>
+        <tr><td><input type="checkbox" name="dentalAdhesives" id="dentalAdhesives" value="Yes"><label for="dentalAdhesives">Use dental adhesives?</label></td></tr>
+        <tr><td><input type="checkbox" name="gagging" id="gagging" value="Yes"><label for="gagging">Difficulty with gagging?</label></td></tr>
+        <tr><td><input type="checkbox" name="hepatitis" id="hepatitis" value="Yes"><label for="hepatitis">Hepatitis?</label></td></tr>
+        <tr><td><input type="checkbox" name="rheumaticFever" id="rheumaticFever" value="Yes"><label for="rheumaticFever">Rheumatic Fever?</label></td></tr>
+        <tr><td><input type="checkbox" name="highBloodPressure" id="highBloodPressure" value="Yes"><label for="highBloodPressure">High Blood Pressure?</label></td></tr>
+        <tr><td><input type="checkbox" name="lowBloodPressure" id="lowBloodPressure" value="Yes"><label for="lowBloodPressure">Low Blood Pressure?</label></td></tr>
+        <tr><td><input type="checkbox" name="cancer" id="cancer" value="Yes"><label for="cancer">Cancer or Tumor?</label></td></tr>
+        <tr><td><input type="checkbox" name="fainting" id="fainting" value="Yes"><label for="fainting">Fainting Spells?</label></td></tr>
+        <tr><td><input type="checkbox" name="epilepsy" id="epilepsy" value="Yes"><label for="epilepsy">Epilepsy?</label></td></tr>
+        <tr><td><input type="checkbox" name="bleeding" id="bleeding" value="Yes"><label for="bleeding">Excessive Bleeding?</label></td></tr>
+        <tr><td><input type="checkbox" name="headaches" id="headaches" value="Yes"><label for="headaches">Frequent Headaches?</label></td></tr>
+        <tr><td><input type="checkbox" name="diabetes" id="diabetes" value="Yes"><label for="diabetes">Diabetes?</label></td></tr>
+        <tr><td><input type="checkbox" name="heartDisease" id="heartDisease" value="Yes"><label for="heartDisease">Heart Disease?</label></td></tr>
+        <tr><td><input type="checkbox" name="venerealDisease" id="venerealDisease" value="Yes"><label for="venerealDisease">Venereal Disease?</label></td></tr>
+        <tr><td><input type="checkbox" name="allergies" id="allergies" value="Yes"><label for="allergies">Allergies?</label></td></tr>
+        <tr><td><input type="checkbox" name="coldSores" id="coldSores" value="Yes"><label for="coldSores">Cold Sores?</label></td></tr>
+        <tr><td><input type="checkbox" name="stroke" id="stroke" value="Yes"><label for="stroke">Stroke?</label></td></tr>
+      </table>
+      <h2>Clinic Policies</h2>
+      <div class="policy-box">
+        <h3>Financial Arrangements</h3>
+        <p>It is our desire to hold our cost to you, our patient, as low as possible. In order to do this, we must have a constant cash flow in our business. For your convenience, we accept cash, checks and major credit cards. For major services, including fabrication of dentures and partial dentures, our office requires payment of ONE-HALF down at the time the impressions are taken and the balance to be paid prior to delivery of the dentures. All other services require payment at the time services are rendered. If this presents a problem to you, please let us know and we will be happy to reschedule you for a more convenient time.</p>
+        <input type="checkbox" name="financialAgree" id="financialAgree" value="Yes"><label for="financialAgree">I agree to the financial arrangements</label>
       </div>
-    </div>
+      <div class="policy-box">
+        <h3>Insurance Authorization & Billing Information</h3>
+        <p>We bill insurance as a courtesy to our patients. Patients who carry dental insurance understand that all services will be charged directly to the patient prior to the completion of treatment. Insurance is billed as a reimbursement to the patient at the end of the treatment period. It is understood that the patient/responsible party agrees to be fully responsible for the payment of services. Please note, all claims are submitted with no guarantee of payment. I have read and accept the terms and conditions outlined above by The Denture Specialist as it relates to payment for services. I agree to be fully responsible for the payment of services provided to me by The Denture Specialist office. If applicable, I give The Denture Specialist permission to submit dental claims for services on my behalf. To the extent permitted by law, I consent to your use and disclosure of my protected health information to carry out payment activities in connection with any claims.</p>
+        <input type="checkbox" name="insuranceAgree" id="insuranceAgree" value="Yes"><label for="insuranceAgree">I authorize insurance billing and agree to terms</label>
+      </div>
+      <div class="policy-box">
+        <h3>Patient Rights</h3>
+        <p>You have the right to look at or get copies of your health information with limited exceptions. This request may be sent in writing to one of the addresses listed above via certified mail. You will be charged a reasonable fee for copies, postage and staff time. You may have the right to place additional restrictions on usage or disclosure of your health information. We are not required by law to agree to these restrictions. To the best of our ability, we will abide by restrictions except in the event of an emergency in our professional opinion. You may request alternate means or locations of which to discuss your information. This must be presented in writing with a satisfactory explanation and detailed format of how payments will be handled under the alternate means or location you request. You have the right to amend your health information in writing and it must explain why the amendment is to take place. We may deny your request under certain circumstances.</p>
+        <input type="checkbox" name="patientRightsAgree" id="patientRightsAgree" value="Yes"><label for="patientRightsAgree">I acknowledge my patient rights</label>
+      </div>
+      <div class="policy-box">
+        <h3>Notice of Privacy Practices</h3>
+        <p>We respect our obligation to keep your health information private. We are obligated by law to give you notice of our privacy practices. This notice describes how we protect your health information and what rights you have regarding it. We may use and disclose your health information to a denturist, dentist or other healthcare provider for treatment purposes. We may use and disclose your health information to bill and collect payment for services we provide to you. Within our professional judgment and unless you object, we will share relevant health and dental information with family and friends assisting in your care. We will not use your information for marketing without your written authorization. We will disclose your health information when required by federal, state or local law authorities or legal processes such as, but not limited to subpoena, court order, warrants or summons. We may disclose your information to appropriate authorities if we reasonably suspect you are a victim of a possible crime so as to avert serious threat to your safety and the safety of those around you. We may use your information to provide appointment reminders such as, but not limited to post cards, voicemail or letters. We are required to provide you with a copy of our Notice of Privacy Practices which states how we may use and/or disclose your health information. If you are filling out online paperwork, you will receive a copy at your next appointment or by email.</p>
+        <input type="checkbox" name="privacyNoticeAgree" id="privacyNoticeAgree" value="Yes"><label for="privacyNoticeAgree">I acknowledge receipt of privacy practices</label>
+      </div>
+      <div class="policy-box">
+        <h3>Cancellation and Missed Appointment Policy</h3>
+        <p>At WestCoast Digital Denture and Implant Center we believe in denture care that is founded upon excellence and quality. We seek to accomplish this, in part, by being on time and prepared for every patient appointment. We feel this will cause minimal disruption to your daily schedule and will provide as much efficiency as possible in completing your denture treatment. Office hours are by appointment only. This office provides private, personal denture care. Appointment time is reserved for you alone. When you make an appointment with us, please be sure that you will be able to keep it. We understand that emergencies and unforeseen treatment problems may arise, causing schedule changes. We always try our best to ensure these circumstances do not inconvenience other patients and we appreciate your understanding of those situations. As a courtesy, our office will call in an attempt to confirm your appointment the day before it is scheduled (we call on Friday for Monday appointments). If you cannot make an appointment as scheduled, please notify the office. Please be aware that if you arrive more than 15 minutes late to your scheduled appointment you may be asked to reschedule. There will be a charge of $75 for missed appointments or appointments that are not canceled with more than a 24 hour notice. Patients who break appointments may also be required to prepay for future treatment. If you have any questions about our appointment cancellation policy, please let us know!</p>
+        <input type="checkbox" name="cancellationAgree" id="cancellationAgree" value="Yes"><label for="cancellationAgree">I acknowledge the cancellation policy</label>
+      </div>
+      <h2>Acknowledgement of Receipt</h2>
+      <table>
+        <tr><td>Signature:</td><td><input type="text" name="signature" placeholder="Enter your signature" required></td></tr>
+        <tr><td>Date:</td><td><input type="date" name="signatureDate" placeholder="Select date" required></td></tr>
+      </table>
+      <button type="submit">Submit Form</button>
+    </form>
   </div>
   <script>
     const { jsPDF } = window.jspdf;
-    const validUsername = 'Cchapman';
-    const validPassword = 'Reline!1950';
-    const loginForm = document.getElementById('loginForm');
-    const dashboardContent = document.getElementById('dashboardContent');
-    const errorMessage = document.getElementById('errorMessage');
-    const authForm = document.getElementById('authForm');
-    function checkLogin() {
-      if (localStorage.getItem('isLoggedIn') === 'true') {
-        loginForm.classList.add('hidden');
-        dashboardContent.classList.remove('hidden');
-        loadSubmissions();
-      }
-    }
-    authForm.addEventListener('submit', (event) => {
+    document.getElementById('intakeForm').addEventListener('submit', async (event) => {
       event.preventDefault();
-      const formData = new FormData(authForm);
-      const username = formData.get('username');
-      const password = formData.get('password');
-      if (username === validUsername && password === validPassword) {
-        localStorage.setItem('isLoggedIn', 'true');
-        loginForm.classList.add('hidden');
-        dashboardContent.classList.remove('hidden');
-        errorMessage.classList.add('hidden');
-        loadSubmissions();
-      } else {
-        errorMessage.textContent = 'Incorrect username or password.';
-        errorMessage.classList.remove('hidden');
-      }
-    });
-    function logout() {
-      localStorage.removeItem('isLoggedIn');
-      loginForm.classList.remove('hidden');
-      dashboardContent.classList.add('hidden');
-      errorMessage.classList.add('hidden');
-      authForm.reset();
-    }
-    function loadSubmissions() {
-      const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
-      const container = document.getElementById('submissionsContainer');
-      container.innerHTML = '';
-      if (submissions.length === 0) {
-        container.innerHTML = '<p class="no-submissions">No submissions available.</p>';
-        return;
-      }
-      submissions.forEach((submission, index) => {
-        const card = document.createElement('div');
-        card.className = 'submission-card';
-        card.innerHTML = `
-          <p><span class="label">Name:</span> ${submission.name || 'Unknown'}</p>
-          <p><span class="label">Timestamp:</span> ${new Date(submission.timestamp).toLocaleString()}</p>
-          <div>
-            <button onclick="viewDetails(${index})">View Details</button>
-            <button onclick="downloadPDF(${index})">Generate PDF</button>
-            <button onclick="deleteSubmission(${index})">Delete</button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-    function viewDetails(index) {
-      const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
-      const submission = submissions[index];
-      alert(JSON.stringify(submission, null, 2));
-    }
-    function deleteSubmission(index) {
-      if (!confirm('Are you sure you want to delete this submission? This action cannot be undone.')) {
-        return;
-      }
-      const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
-      submissions.splice(index, 1);
-      localStorage.setItem('submissions', JSON.stringify(submissions));
-      loadSubmissions();
-    }
-    function downloadPDF(index) {
-      const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
-      const data = submissions[index];
+      const formData = new FormData(event.target);
+      const data = Object.fromEntries(formData);
+      data.timestamp = new Date().toISOString();
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.width;
       const pageHeight = doc.internal.pageSize.height;
@@ -394,11 +291,31 @@
         ['Date', data.signatureDate]
       ]);
       if (doc.getNumberOfPages() > 1 && y < 100) {
-        doc.deletePage(1);
+        doc.deletePage(doc.getNumberOfPages());
       }
-      doc.output('dataurlnewwindow');
-    }
-    checkLogin();
+      doc.save(`submission_${data.name}_${Date.now()}.pdf`);
+      const json = JSON.stringify(data);
+      const jsonBlob = new Blob([json], { type: 'application/json' });
+      const jsonUrl = URL.createObjectURL(jsonBlob);
+      const jsonA = document.createElement('a');
+      jsonA.href = jsonUrl;
+      jsonA.download = `submission_${data.name}_${Date.now()}.json`;
+      jsonA.click();
+      URL.revokeObjectURL(jsonUrl);
+      const csv = Object.entries(data).map(([key, value]) => `"${key}","${value}"`).join('\n');
+      const csvBlob = new Blob([csv], { type: 'text/csv' });
+      const csvUrl = URL.createObjectURL(csvBlob);
+      const csvA = document.createElement('a');
+      csvA.href = csvUrl;
+      csvA.download = `submission_${data.name}_${Date.now()}.csv`;
+      csvA.click();
+      URL.revokeObjectURL(csvUrl);
+      let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+      submissions.push(data);
+      localStorage.setItem('submissions', JSON.stringify(submissions));
+      alert('Submission successful! Please upload PDF/JSON/CSV to Google Drive.');
+      localStorage.removeItem('submissions'); // HIPAA compliance
+    });
   </script>
 </body>
 </html>
