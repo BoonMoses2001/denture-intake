@@ -1,4 +1,4 @@
-YPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -313,7 +313,7 @@ YPE html>
       let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
       submissions.push(data);
       localStorage.setItem('submissions', JSON.stringify(submissions));
-      alert('Submission successful! Please upload PDF/JSON/CSV to Google Drive.');
+      alert('Submission successful! Files have been saved to your Downloads folder and will be moved to OneDrive/DentureIntake automatically.');
       localStorage.removeItem('submissions'); // HIPAA compliance
     });
   </script>
