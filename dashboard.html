@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Submissions Dashboard</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4682B4">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
@@ -43,14 +45,14 @@
       border: 1px solid #0033A0;
       margin: 20px 0;
     }
-    input[type="text"], input[type="password"] {
+    input[type="text"], input[type="password"], input[type="file"] {
       width: 100%;
       padding: 12px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 5px;
       box-sizing: border-box;
-      margin-top: 5px;
+      margin: 10px 0;
     }
     button {
       background-color: #9933FF;
@@ -113,7 +115,7 @@
       color: #333;
       margin: 20px 0;
     }
-    .logout-container {
+    .logout-container, .action-container {
       text-align: center;
       margin-top: 20px;
     }
@@ -123,7 +125,7 @@
       }
       h1 { font-size: 24px; }
       h2 { font-size: 20px; }
-      input[type="text"], input[type="password"] {
+      input[type="text"], input[type="password"], input[type="file"] {
         font-size: 14px;
         padding: 10px;
       }
@@ -156,6 +158,10 @@
     <div id="dashboardContent" class="hidden">
       <h2>Submissions Dashboard</h2>
       <hr>
+      <div class="action-container">
+        <input type="file" id="importSubmissions" accept=".json" multiple>
+        <button onclick="exportSubmissions()">Export All Submissions</button>
+      </div>
       <div id="submissionsContainer" class="submissions-container"></div>
       <div class="logout-container">
         <button onclick="logout()">Logout</button>
@@ -195,6 +201,7 @@
     });
     function logout() {
       localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('submissions'); // HIPAA compliance
       loginForm.classList.remove('hidden');
       dashboardContent.classList.add('hidden');
       errorMessage.classList.add('hidden');
@@ -205,7 +212,7 @@
       const container = document.getElementById('submissionsContainer');
       container.innerHTML = '';
       if (submissions.length === 0) {
-        container.innerHTML = '<p class="no-submissions">No submissions available.</p>';
+        container.innerHTML = '<p class="no-submissions">No submissions available. Import JSON files from OneDrive/DentureIntake.</p>';
         return;
       }
       submissions.forEach((submission, index) => {
@@ -237,6 +244,46 @@
       localStorage.setItem('submissions', JSON.stringify(submissions));
       loadSubmissions();
     }
+    function exportSubmissions() {
+      const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+      if (submissions.length === 0) {
+        alert('No submissions to export.');
+        return;
+      }
+      const json = JSON.stringify(submissions);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `submissions_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      localStorage.removeItem('submissions'); // HIPAA compliance
+      loadSubmissions();
+    }
+    document.getElementById('importSubmissions').addEventListener('change', (event) => {
+      const files = event.target.files;
+      if (files.length === 0) {
+        alert('Please select at least one JSON file.');
+        return;
+      }
+      let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = JSON.parse(e.target.result);
+            submissions.push(data);
+            localStorage.setItem('submissions', JSON.stringify(submissions));
+            alert(`Imported ${file.name} successfully!`);
+            loadSubmissions();
+          } catch (error) {
+            alert(`Error importing ${file.name}: Invalid JSON`);
+          }
+        };
+        reader.readAsText(file);
+      });
+    });
     function downloadPDF(index) {
       const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
       const data = submissions[index];
@@ -394,9 +441,9 @@
         ['Date', data.signatureDate]
       ]);
       if (doc.getNumberOfPages() > 1 && y < 100) {
-        doc.deletePage(1);
+        doc.deletePage(doc.getNumberOfPages());
       }
-      doc.output('dataurlnewwindow');
+      doc.save(`submission_${data.name}_${Date.now()}.pdf`);
     }
     checkLogin();
   </script>
