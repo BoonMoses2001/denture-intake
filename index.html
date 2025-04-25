@@ -1,187 +1,486 @@
-<script>
-  const { jsPDF } = window.jspdf;
-  document.getElementById('intakeForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const data = Object.fromEntries(formData);
-    data.timestamp = new Date().toISOString();
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.width;
-    const pageHeight = doc.internal.pageSize.height;
-    const formWidth = pageWidth * 0.95;
-    const formX = (pageWidth - formWidth) / 2;
-    const formPadding = 15;
-    const lineHeight = 7;
-    const marginBottom = 20;
-    function addNewPage() {
-      doc.addPage();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WestCoast Digital Denture and Implant Center - Patient Intake Form</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #4682b4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .form-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 800px;
+      border: 2px solid #0033a0;
+    }
+    h1, h2 {
+      color: #0033a0;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #0033a0;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto;
+    }
+    button:hover {
+      background-color: #002080;
+    }
+    .policy-section {
+      margin: 20px 0;
+    }
+    .policy-section p {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .policy-section label {
+      font-weight: normal;
+      display: inline;
+    }
+    .signature-section canvas {
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1>WestCoast Digital Denture and Implant Center</h1>
+    <h2>Patient Intake Form</h2>
+    <form id="intakeForm">
+      <h3>Personal Information</h3>
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" required>
+      <label for="birthdate">Birthdate</label>
+      <input type="date" id="birthdate" name="birthdate" required>
+      <label for="address">Address</label>
+      <input type="text" id="address" name="address">
+      <label for="city">City</label>
+      <input type="text" id="city" name="city">
+      <label for="state">State</label>
+      <input type="text" id="state" name="state">
+      <label for="zip">Zip</label>
+      <input type="text" id="zip" name="zip">
+      <label for="phone">Phone</label>
+      <input type="tel" id="phone" name="phone">
+      <label for="email">E-Mail</label>
+      <input type="email" id="email" name="email">
+      <label for="occupation">Occupation/Employer</label>
+      <input type="text" id="occupation" name="occupation">
+      <label for="emergencyContactName">Emergency Contact Name</label>
+      <input type="text" id="emergencyContactName" name="emergencyContactName">
+      <label for="emergencyContactPhone">Emergency Contact Phone</label>
+      <input type="tel" id="emergencyContactPhone" name="emergencyContactPhone">
+      <label for="physician">Physician Name and Contact</label>
+      <input type="text" id="physician" name="physician">
+
+      <h3>Insurance Information</h3>
+      <label for="insuranceCompany">Insurance Company</label>
+      <input type="text" id="insuranceCompany" name="insuranceCompany">
+      <label for="insuranceAddress">Address</label>
+      <input type="text" id="insuranceAddress" name="insuranceAddress">
+      <label for="insuranceCity">City</label>
+      <input type="text" id="insuranceCity" name="insuranceCity">
+      <label for="insuranceState">State</label>
+      <input type="text" id="insuranceState" name="insuranceState">
+      <label for="insuranceZip">Zip</label>
+      <input type="text" id="insuranceZip" name="insuranceZip">
+
+      <h3>Dental History</h3>
+      <label for="dentureAge">Age of Current Denture</label>
+      <input type="text" id="dentureAge" name="dentureAge">
+      <label for="lastDentures">Last Dentures Received</label>
+      <input type="text" id="lastDentures" name="lastDentures">
+      <label for="referral">Referral Source</label>
+      <input type="text" id="referral" name="referral">
+
+      <h3>Medical History</h3>
+      <label for="medications">Medications</label>
+      <textarea id="medications" name="medications"></textarea>
+      <label for="doctorCare">Under doctor care?</label>
+      <select id="doctorCare" name="doctorCare">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="teethAppearance">Dissatisfied with teeth appearance?</label>
+      <select id="teethAppearance" name="teethAppearance">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="chewingDifficulty">Difficulty chewing?</label>
+      <select id="chewingDifficulty" name="chewingDifficulty">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="slowHealing">Slow-healing sores?</label>
+      <select id="slowHealing" name="slowHealing">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="mouthOpening">Difficulty opening mouth?</label>
+      <select id="mouthOpening" name="mouthOpening">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="dentalAdhesives">Use dental adhesives?</label>
+      <select id="dentalAdhesives" name="dentalAdhesives">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="gagging">Difficulty with gagging?</label>
+      <select id="gagging" name="gagging">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="hepatitis">Hepatitis</label>
+      <select id="hepatitis" name="hepatitis">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="rheumaticFever">Rheumatic Fever</label>
+      <select id="rheumaticFever" name="rheumaticFever">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="highBloodPressure">High Blood Pressure</label>
+      <select id="highBloodPressure" name="highBloodPressure">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="lowBloodPressure">Low Blood Pressure</label>
+      <select id="lowBloodPressure" name="lowBloodPressure">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="cancer">Cancer or Tumor</label>
+      <select id="cancer" name="cancer">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="fainting">Fainting Spells</label>
+      <select id="fainting" name="fainting">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="epilepsy">Epilepsy</label>
+      <select id="epilepsy" name="epilepsy">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="bleeding">Excessive Bleeding</label>
+      <select id="bleeding" name="bleeding">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="headaches">Frequent Headaches</label>
+      <select id="headaches" name="headaches">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="diabetes">Diabetes</label>
+      <select id="diabetes" name="diabetes">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="heartDisease">Heart Disease</label>
+      <select id="heartDisease" name="heartDisease">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="venerealDisease">Venereal Disease</label>
+      <select id="venerealDisease" name="venerealDisease">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="allergies">Allergies</label>
+      <select id="allergies" name="allergies">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="coldSores">Cold Sores</label>
+      <select id="coldSores" name="coldSores">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <label for="stroke">Stroke</label>
+      <select id="stroke" name="stroke">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <h3>Clinic Policies</h3>
+      <div class="policy-section">
+        <h4>Financial Arrangements</h4>
+        <p>It is our desire to hold our cost to you, our patient, as low as possible. In order to do this, we must have a constant cash flow in our business. For your convenience, we accept cash, checks and major credit cards. For major services, including fabrication of dentures and partial dentures, our office requires payment of ONE-HALF down at the time the impressions are taken and the balance to be paid prior to delivery of the dentures. All other services require payment at the time services are rendered. If this presents a problem to you, please let us know and we will be happy to reschedule you for a more convenient time.</p>
+        <label><input type="checkbox" name="financialAgree" value="Yes"> I agree to the Financial Arrangements</label>
+      </div>
+      <div class="policy-section">
+        <h4>Insurance Authorization & Billing Information</h4>
+        <p>We bill insurance as a courtesy to our patients. Patients who carry dental insurance understand that all services will be charged directly to the patient prior to the completion of treatment. Insurance is billed as a reimbursement to the patient at the end of the treatment period. It is understood that the patient/responsible party agrees to be fully responsible for the payment of services. Please note, all claims are submitted with no guarantee of payment. I have read and accept the terms and conditions outlined above by The Denture Specialist as it relates to payment for services. I agree to be fully responsible for the payment of services provided to me by The Denture Specialist office. If applicable, I give The Denture Specialist permission to submit dental claims for services on my behalf. To the extent permitted by law, I consent to your use and disclosure of my protected health information to carry out payment activities in connection with any claims.</p>
+        <label><input type="checkbox" name="insuranceAgree" value="Yes"> I agree to the Insurance Authorization & Billing Information</label>
+      </div>
+      <div class="policy-section">
+        <h4>Patient Rights</h4>
+        <p>You have the right to look at or get copies of your health information with limited exceptions. This request may be sent in writing to one of the addresses listed above via certified mail. You will be charged a reasonable fee for copies, postage and staff time. You may have the right to place additional restrictions on usage or disclosure of your health information. We are not required by law to agree to these restrictions. To the best of our ability, we will abide by restrictions except in the event of an emergency in our professional opinion. You may request alternate means or locations of which to discuss your information. This must be presented in writing with a satisfactory explanation and detailed format of how payments will be handled under the alternate means or location you request. You have the right to amend your health information in writing and it must explain why the amendment is to take place. We may deny your request under certain circumstances.</p>
+        <label><input type="checkbox" name="patientRightsAgree" value="Yes"> I acknowledge the Patient Rights</label>
+      </div>
+      <div class="policy-section">
+        <h4>Notice of Privacy Practices</h4>
+        <p>We respect our obligation to keep your health information private. We are obligated by law to give you notice of our privacy practices. This notice describes how we protect your health information and what rights you have regarding it. We may use and disclose your health information to a denturist, dentist or other healthcare provider for treatment purposes. We may use and disclose your health information to bill and collect payment for services we provide to you. Within our professional judgment and unless you object, we will share relevant health and dental information with family and friends assisting in your care. We will not use your information for marketing without your written authorization. We will disclose your health information when required by federal, state or local law authorities or legal processes such as, but not limited to subpoena, court order, warrants or summons. We may disclose your information to appropriate authorities if we reasonably suspect you are a victim of a possible crime so as to avert serious threat to your safety and the safety of those around you. We may use your information to provide appointment reminders such as, but not limited to post cards, voicemail or letters. We are required to provide you with a copy of our Notice of Privacy Practices which states how we may use and/or disclose your health information. If you are filling out online paperwork, you will receive a copy at your next appointment or by email.</p>
+        <label><input type="checkbox" name="privacyNoticeAgree" value="Yes"> I acknowledge receipt of the Notice of Privacy Practices</label>
+      </div>
+      <div class="policy-section">
+        <h4>Cancellation and Missed Appointment Policy</h4>
+        <p>At WestCoast Digital Denture and Implant Center we believe in denture care that is founded upon excellence and quality. We seek to accomplish this, in part, by being on time and prepared for every patient appointment. We feel this will cause minimal disruption to your daily schedule and will provide as much efficiency as possible in completing your denture treatment. Office hours are by appointment only. This office provides private, personal denture care. Appointment time is reserved for you alone. When you make an appointment with us, please be sure that you will be able to keep it. We understand that emergencies and unforeseen treatment problems may arise, causing schedule changes. We always try our best to ensure these circumstances do not inconvenience other patients and we appreciate your understanding of those situations. As a courtesy, our office will call in an attempt to confirm your appointment the day before it is scheduled (we call on Friday for Monday appointments). If you cannot make an appointment as scheduled, please notify the office. Please be aware that if you arrive more than 15 minutes late to your scheduled appointment you may be asked to reschedule. There will be a charge of $75 for missed appointments or appointments that are not canceled with more than a 24 hour notice. Patients who break appointments may also be required to prepay for future treatment. If you have any questions about our appointment cancellation policy, please let us know!</p>
+        <label><input type="checkbox" name="cancellationAgree" value="Yes"> I acknowledge the Cancellation and Missed Appointment Policy</label>
+      </div>
+
+      <h3>Acknowledgement of Receipt</h3>
+      <label for="signature">Signature</label>
+      <input type="text" id="signature" name="signature" required>
+      <label for="signatureDate">Date</label>
+      <input type="date" id="signatureDate" name="signatureDate" required>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    const { jsPDF } = window.jspdf;
+    document.getElementById('intakeForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const data = Object.fromEntries(formData);
+      data.timestamp = new Date().toISOString();
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
+      const formWidth = pageWidth * 0.95;
+      const formX = (pageWidth - formWidth) / 2;
+      const formPadding = 15;
+      const lineHeight = 7;
+      const marginBottom = 20;
+      function addNewPage() {
+        doc.addPage();
+        doc.setFillColor(70, 130, 180);
+        doc.rect(0, 0, pageWidth, pageHeight, 'F');
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(0, 51, 160);
+        doc.rect(formX, 10, formWidth, pageHeight - 20, 'FD');
+        return 20;
+      }
+      function checkPageOverflow(y, additionalHeight) {
+        if (y + additionalHeight > pageHeight - marginBottom) {
+          return addNewPage();
+        }
+        return y;
+      }
       doc.setFillColor(70, 130, 180);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
       doc.setFillColor(255, 255, 255);
       doc.setDrawColor(0, 51, 160);
       doc.rect(formX, 10, formWidth, pageHeight - 20, 'FD');
-      return 20;
-    }
-    function checkPageOverflow(y, additionalHeight) {
-      if (y + additionalHeight > pageHeight - marginBottom) {
-        return addNewPage();
-      }
-      return y;
-    }
-    doc.setFillColor(70, 130, 180);
-    doc.rect(0, 0, pageWidth, pageHeight, 'F');
-    doc.setFillColor(255, 255, 255);
-    doc.setDrawColor(0, 51, 160);
-    doc.rect(formX, 10, formWidth, pageHeight - 20, 'FD');
-    doc.setFontSize(20).setTextColor(0, 51, 160);
-    doc.text('WestCoast Digital Denture and Implant Center', pageWidth / 2, 30, { align: 'center' });
-    doc.setFontSize(16).text('Patient Intake Form', pageWidth / 2, 45, { align: 'center' });
-    doc.setFontSize(10).setFont('times', 'italic').text('Chris R. Chapman, L.D. & Melanie E. Chapman, L.D.', pageWidth / 2, 55, { align: 'center' });
-    doc.setLineWidth(0.5).setDrawColor(0, 51, 160);
-    doc.line(formX, 60, formX + formWidth, 60);
-    let y = 70;
-    function addSection(title, fields, isPolicy = false) {
-      y = checkPageOverflow(y, 20);
-      doc.setFontSize(16).setFont('helvetica', 'bold').setTextColor(0, 51, 160);
-      doc.text(title, formX + formPadding, y);
-      y += 10;
-      doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(0, 0, 0);
-      if (isPolicy) {
-        fields.forEach(([label, value, agreeField]) => {
-          const titleHeight = 7;
-          const lines = doc.splitTextToSize(value, formWidth - 2 * formPadding);
-          const textHeight = lines.length * lineHeight;
-          const signatureHeight = (data[agreeField] === 'Yes' && data.signature) ? lineHeight + 3 : 0;
-          const totalHeight = titleHeight + textHeight + signatureHeight + 10;
-          y = checkPageOverflow(y, totalHeight);
-          doc.setFontSize(12).setFont('helvetica', 'bold');
-          doc.text(label, formX + formPadding, y);
-          y += 7;
-          doc.setFontSize(10).setFont('helvetica', 'normal');
-          lines.forEach(line => {
-            doc.text(line, formX + formPadding, y);
-            y += lineHeight;
-          });
-          if (data[agreeField] === 'Yes' && data.signature) {
-            y += 3;
-            doc.setFont('helvetica', 'bold');
-            doc.text(`Signature: ${data.signature}`, formX + formPadding, y);
-            y += lineHeight + 3;
-          }
-          y += 3;
-        });
-      } else {
-        fields.forEach(([label, value]) => {
-          if (value || isPolicy) {
-            const text = `${label}: ${value || ''}`;
-            const lines = doc.splitTextToSize(text, formWidth - 2 * formPadding);
+      doc.setFontSize(20).setTextColor(0, 51, 160);
+      doc.text('WestCoast Digital Denture and Implant Center', pageWidth / 2, 30, { align: 'center' });
+      doc.setFontSize(16).text('Patient Intake Form', pageWidth / 2, 45, { align: 'center' });
+      doc.setFontSize(10).setFont('times', 'italic').text('Chris R. Chapman, L.D. & Melanie E. Chapman, L.D.', pageWidth / 2, 55, { align: 'center' });
+      doc.setLineWidth(0.5).setDrawColor(0, 51, 160);
+      doc.line(formX, 60, formX + formWidth, 60);
+      let y = 70;
+      function addSection(title, fields, isPolicy = false) {
+        y = checkPageOverflow(y, 20);
+        doc.setFontSize(16).setFont('helvetica', 'bold').setTextColor(0, 51, 160);
+        doc.text(title, formX + formPadding, y);
+        y += 10;
+        doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(0, 0, 0);
+        if (isPolicy) {
+          fields.forEach(([label, value, agreeField]) => {
+            const titleHeight = 7;
+            const lines = doc.splitTextToSize(value, formWidth - 2 * formPadding);
             const textHeight = lines.length * lineHeight;
-            y = checkPageOverflow(y, textHeight + 3);
+            const signatureHeight = (data[agreeField] === 'Yes' && data.signature) ? lineHeight + 3 : 0;
+            const totalHeight = titleHeight + textHeight + signatureHeight + 10;
+            y = checkPageOverflow(y, totalHeight);
+            doc.setFontSize(12).setFont('helvetica', 'bold');
+            doc.text(label, formX + formPadding, y);
+            y += 7;
+            doc.setFontSize(10).setFont('helvetica', 'normal');
             lines.forEach(line => {
               doc.text(line, formX + formPadding, y);
               y += lineHeight;
             });
+            if (data[agreeField] === 'Yes' && data.signature) {
+              y += 3;
+              doc.setFont('helvetica', 'bold');
+              doc.text(`Signature: ${data.signature}`, formX + formPadding, y);
+              y += lineHeight + 3;
+            }
             y += 3;
-          }
-        });
+          });
+        } else {
+          fields.forEach(([label, value]) => {
+            if (value || isPolicy) {
+              const text = `${label}: ${value || ''}`;
+              const lines = doc.splitTextToSize(text, formWidth - 2 * formPadding);
+              const textHeight = lines.length * lineHeight;
+              y = checkPageOverflow(y, textHeight + 3);
+              lines.forEach(line => {
+                doc.text(line, formX + formPadding, y);
+                y += lineHeight;
+              });
+              y += 3;
+            }
+          });
+        }
+        y = checkPageOverflow(y, 10);
+        doc.line(formX, y, formX + formWidth, y);
+        y += 10;
       }
-      y = checkPageOverflow(y, 10);
-      doc.line(formX, y, formX + formWidth, y);
-      y += 10;
-    }
-    addSection('Personal Information', [
-      ['Full Name', data.name],
-      ['Birthdate', data.birthdate],
-      ['Address', data.address],
-      ['City', data.city],
-      ['State', data.state],
-      ['Zip', data.zip],
-      ['Phone', data.phone],
-      ['E-Mail', data.email],
-      ['Occupation/Employer', data.occupation],
-      ['Emergency Contact Name', data.emergencyContactName],
-      ['Emergency Contact Phone', data.emergencyContactPhone],
-      ['Physician Name and Contact', data.physician]
-    ]);
-    addSection('Insurance Information', [
-      ['Insurance Company', data.insuranceCompany],
-      ['Address', data.insuranceAddress],
-      ['City', data.insuranceCity],
-      ['State', data.insuranceState],
-      ['Zip', data.insuranceZip]
-    ]);
-    addSection('Dental History', [
-      ['Age of Current Denture', data.dentureAge],
-      ['Last Dentures Received', data.lastDentures],
-      ['Referral Source', data.referral]
-    ]);
-    addSection('Medical History', [
-      ['Medications', data.medications],
-      ['Under doctor care?', data.doctorCare || 'No'],
-      ['Dissatisfied with teeth appearance?', data.teethAppearance || 'No'],
-      ['Difficulty chewing?', data.chewingDifficulty || 'No'],
-      ['Slow-healing sores?', data.slowHealing || 'No'],
-      ['Difficulty opening mouth?', data.mouthOpening || 'No'],
-      ['Use dental adhesives?', data.dentalAdhesives || 'No'],
-      ['Difficulty with gagging?', data.gagging || 'No'],
-      ['Hepatitis', data.hepatitis || 'No'],
-      ['Rheumatic Fever', data.rheumaticFever || 'No'],
-      ['High Blood Pressure', data.highBloodPressure || 'No'],
-      ['Low Blood Pressure', data.lowBloodPressure || 'No'],
-      ['Cancer or Tumor', data.cancer || 'No'],
-      ['Fainting Spells', data.fainting || 'No'],
-      ['Epilepsy', data.epilepsy || 'No'],
-      ['Excessive Bleeding', data.bleeding || 'No'],
-      ['Frequent Headaches', data.headaches || 'No'],
-      ['Diabetes', data.diabetes || 'No'],
-      ['Heart Disease', data.heartDisease || 'No'],
-      ['Venereal Disease', data.venerealDisease || 'No'],
-      ['Allergies', data.allergies || 'No'],
-      ['Cold Sores', data.coldSores || 'No'],
-      ['Stroke', data.stroke || 'No']
-    ]);
-    addSection('Clinic Policies', [
-      ['Financial Arrangements', 'It is our desire to hold our cost to you, our patient, as low as possible. In order to do this, we must have a constant cash flow in our business. For your convenience, we accept cash, checks and major credit cards. For major services, including fabrication of dentures and partial dentures, our office requires payment of ONE-HALF down at the time the impressions are taken and the balance to be paid prior to delivery of the dentures. All other services require payment at the time services are rendered. If this presents a problem to you, please let us know and we will be happy to reschedule you for a more convenient time.', 'financialAgree'],
-      ['Insurance Authorization & Billing Information', 'We bill insurance as a courtesy to our patients. Patients who carry dental insurance understand that all services will be charged directly to the patient prior to the completion of treatment. Insurance is billed as a reimbursement to the patient at the end of the treatment period. It is understood that the patient/responsible party agrees to be fully responsible for the payment of services. Please note, all claims are submitted with no guarantee of payment. I have read and accept the terms and conditions outlined above by The Denture Specialist as it relates to payment for services. I agree to be fully responsible for the payment of services provided to me by The Denture Specialist office. If applicable, I give The Denture Specialist permission to submit dental claims for services on my behalf. To the extent permitted by law, I consent to your use and disclosure of my protected health information to carry out payment activities in connection with any claims.', 'insuranceAgree'],
-      ['Patient Rights', 'You have the right to look at or get copies of your health information with limited exceptions. This request may be sent in writing to one of the addresses listed above via certified mail. You will be charged a reasonable fee for copies, postage and staff time. You may have the right to place additional restrictions on usage or disclosure of your health information. We are not required by law to agree to these restrictions. To the best of our ability, we will abide by restrictions except in the event of an emergency in our professional opinion. You may request alternate means or locations of which to discuss your information. This must be presented in writing with a satisfactory explanation and detailed format of how payments will be handled under the alternate means or location you request. You have the right to amend your health information in writing and it must explain why the amendment is to take place. We may deny your request under certain circumstances.', 'patientRightsAgree'],
-      ['Notice of Privacy Practices', 'We respect our obligation to keep your health information private. We are obligated by law to give you notice of our privacy practices. This notice describes how we protect your health information and what rights you have regarding it. We may use and disclose your health information to a denturist, dentist or other healthcare provider for treatment purposes. We may use and disclose your health information to bill and collect payment for services we provide to you. Within our professional judgment and unless you object, we will share relevant health and dental information with family and friends assisting in your care. We will not use your information for marketing without your written authorization. We will disclose your health information when required by federal, state or local law authorities or legal processes such as, but not limited to subpoena, court order, warrants or summons. We may disclose your information to appropriate authorities if we reasonably suspect you are a victim of a possible crime so as to avert serious threat to your safety and the safety of those around you. We may use your information to provide appointment reminders such as, but not limited to post cards, voicemail or letters. We are required to provide you with a copy of our Notice of Privacy Practices which states how we may use and/or disclose your health information. If you are filling out online paperwork, you will receive a copy at your next appointment or by email.', 'privacyNoticeAgree'],
-      ['Cancellation and Missed Appointment Policy', 'At WestCoast Digital Denture and Implant Center we believe in denture care that is founded upon excellence and quality. We seek to accomplish this, in part, by being on time and prepared for every patient appointment. We feel this will cause minimal disruption to your daily schedule and will provide as much efficiency as possible in completing your denture treatment. Office hours are by appointment only. This office provides private, personal denture care. Appointment time is reserved for you alone. When you make an appointment with us, please be sure that you will be able to keep it. We understand that emergencies and unforeseen treatment problems may arise, causing schedule changes. We always try our best to ensure these circumstances do not inconvenience other patients and we appreciate your understanding of those situations. As a courtesy, our office will call in an attempt to confirm your appointment the day before it is scheduled (we call on Friday for Monday appointments). If you cannot make an appointment as scheduled, please notify the office. Please be aware that if you arrive more than 15 minutes late to your scheduled appointment you may be asked to reschedule. There will be a charge of $75 for missed appointments or appointments that are not canceled with more than a 24 hour notice. Patients who break appointments may also be required to prepay for future treatment. If you have any questions about our appointment cancellation policy, please let us know!', 'cancellationAgree']
-    ], true);
-    addSection('Acknowledgements', [
-      ['Financial Arrangements Agreed', data.financialAgree || 'No'],
-      ['Insurance Claims and Billing Authorized', data.insuranceAgree || 'No'],
-      ['Patient Rights Acknowledged', data.patientRightsAgree || 'No'],
-      ['Notice of Privacy Practices Received', data.privacyNoticeAgree || 'No'],
-      ['Cancellation Policy Acknowledged', data.cancellationAgree || 'No']
-    ]);
-    addSection('Acknowledgement of Receipt', [
-      ['Signature', data.signature],
-      ['Date', data.signatureDate]
-    ]);
-    if (doc.getNumberOfPages() > 1 && y < 100) {
-      doc.deletePage(doc.getNumberOfPages());
-    }
-    doc.save(`submission_${data.name}_${Date.now()}.pdf`);
-    const json = JSON.stringify(data);
-    const jsonBlob = new Blob([json], { type: 'application/json' });
-    const jsonUrl = URL.createObjectURL(jsonBlob);
-    const jsonA = document.createElement('a');
-    jsonA.href = jsonUrl;
-    jsonA.download = `submission_${data.name}_${Date.now()}.json`;
-    jsonA.click();
-    URL.revokeObjectURL(jsonUrl);
-    const csv = Object.entries(data).map(([key, value]) => `"${key}","${value}"`).join('\n');
-    const csvBlob = new Blob([csv], { type: 'text/csv' });
-    const csvUrl = URL.createObjectURL(csvBlob);
-    const csvA = document.createElement('a');
-    csvA.href = csvUrl;
-    csvA.download = `submission_${data.name}_${Date.now()}.csv`;
-    csvA.click();
-    URL.revokeObjectURL(csvUrl);
-    let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
-    submissions.push(data);
-    localStorage.setItem('submissions', JSON.stringify(submissions));
-    alert('Submission successful! Files have been saved to your Downloads folder and will be moved to OneDrive/DENTURE_SPECIALIST_SCAN_DATA automatically.');
-    localStorage.removeItem('submissions'); // HIPAA compliance
-  });
-</script>
+      addSection('Personal Information', [
+        ['Full Name', data.name],
+        ['Birthdate', data.birthdate],
+        ['Address', data.address],
+        ['City', data.city],
+        ['State', data.state],
+        ['Zip', data.zip],
+        ['Phone', data.phone],
+        ['E-Mail', data.email],
+        ['Occupation/Employer', data.occupation],
+        ['Emergency Contact Name', data.emergencyContactName],
+        ['Emergency Contact Phone', data.emergencyContactPhone],
+        ['Physician Name and Contact', data.physician]
+      ]);
+      addSection('Insurance Information', [
+        ['Insurance Company', data.insuranceCompany],
+        ['Address', data.insuranceAddress],
+        ['City', data.insuranceCity],
+        ['State', data.insuranceState],
+        ['Zip', data.insuranceZip]
+      ]);
+      addSection('Dental History', [
+        ['Age of Current Denture', data.dentureAge],
+        ['Last Dentures Received', data.lastDentures],
+        ['Referral Source', data.referral]
+      ]);
+      addSection('Medical History', [
+        ['Medications', data.medications],
+        ['Under doctor care?', data.doctorCare || 'No'],
+        ['Dissatisfied with teeth appearance?', data.teethAppearance || 'No'],
+        ['Difficulty chewing?', data.chewingDifficulty || 'No'],
+        ['Slow-healing sores?', data.slowHealing || 'No'],
+        ['Difficulty opening mouth?', data.mouthOpening || 'No'],
+        ['Use dental adhesives?', data.dentalAdhesives || 'No'],
+        ['Difficulty with gagging?', data.gagging || 'No'],
+        ['Hepatitis', data.hepatitis || 'No'],
+        ['Rheumatic Fever', data.rheumaticFever || 'No'],
+        ['High Blood Pressure', data.highBloodPressure || 'No'],
+        ['Low Blood Pressure', data.lowBloodPressure || 'No'],
+        ['Cancer or Tumor', data.cancer || 'No'],
+        ['Fainting Spells', data.fainting || 'No'],
+        ['Epilepsy', data.epilepsy || 'No'],
+        ['Excessive Bleeding', data.bleeding || 'No'],
+        ['Frequent Headaches', data.headaches || 'No'],
+        ['Diabetes', data.diabetes || 'No'],
+        ['Heart Disease', data.heartDisease || 'No'],
+        ['Venereal Disease', data.venerealDisease || 'No'],
+        ['Allergies', data.allergies || 'No'],
+        ['Cold Sores', data.coldSores || 'No'],
+        ['Stroke', data.stroke || 'No']
+      ]);
+      addSection('Clinic Policies', [
+        ['Financial Arrangements', 'It is our desire to hold our cost to you, our patient, as low as possible. In order to do this, we must have a constant cash flow in our business. For your convenience, we accept cash, checks and major credit cards. For major services, including fabrication of dentures and partial dentures, our office requires payment of ONE-HALF down at the time the impressions are taken and the balance to be paid prior to delivery of the dentures. All other services require payment at the time services are rendered. If this presents a problem to you, please let us know and we will be happy to reschedule you for a more convenient time.', 'financialAgree'],
+        ['Insurance Authorization & Billing Information', 'We bill insurance as a courtesy to our patients. Patients who carry dental insurance understand that all services will be charged directly to the patient prior to the completion of treatment. Insurance is billed as a reimbursement to the patient at the end of the treatment period. It is understood that the patient/responsible party agrees to be fully responsible for the payment of services. Please note, all claims are submitted with no guarantee of payment. I have read and accept the terms and conditions outlined above by The Denture Specialist as it relates to payment for services. I agree to be fully responsible for the payment of services provided to me by The Denture Specialist office. If applicable, I give The Denture Specialist permission to submit dental claims for services on my behalf. To the extent permitted by law, I consent to your use and disclosure of my protected health information to carry out payment activities in connection with any claims.', 'insuranceAgree'],
+        ['Patient Rights', 'You have the right to look at or get copies of your health information with limited exceptions. This request may be sent in writing to one of the addresses listed above via certified mail. You will be charged a reasonable fee for copies, postage and staff time. You may have the right to place additional restrictions on usage or disclosure of your health information. We are not required by law to agree to these restrictions. To the best of our ability, we will abide by restrictions except in the event of an emergency in our professional opinion. You may request alternate means or locations of which to discuss your information. This must be presented in writing with a satisfactory explanation and detailed format of how payments will be handled under the alternate means or location you request. You have the right to amend your health information in writing and it must explain why the amendment is to take place. We may deny your request under certain circumstances.', 'patientRightsAgree'],
+        ['Notice of Privacy Practices', 'We respect our obligation to keep your health information private. We are obligated by law to give you notice of our privacy practices. This notice describes how we protect your health information and what rights you have regarding it. We may use and disclose your health information to a denturist, dentist or other healthcare provider for treatment purposes. We may use and disclose your health information to bill and collect payment for services we provide to you. Within our professional judgment and unless you object, we will share relevant health and dental information with family and friends assisting in your care. We will not use your information for marketing without your written authorization. We will disclose your health information when required by federal, state or local law authorities or legal processes such as, but not limited to subpoena, court order, warrants or summons. We may disclose your information to appropriate authorities if we reasonably suspect you are a victim of a possible crime so as to avert serious threat to your safety and the safety of those around you. We may use your information to provide appointment reminders such as, but not limited to post cards, voicemail or letters. We are required to provide you with a copy of our Notice of Privacy Practices which states how we may use and/or disclose your health information. If you are filling out online paperwork, you will receive a copy at your next appointment or by email.', 'privacyNoticeAgree'],
+        ['Cancellation and Missed Appointment Policy', 'At WestCoast Digital Denture and Implant Center we believe in denture care that is founded upon excellence and quality. We seek to accomplish this, in part, by being on time and prepared for every patient appointment. We feel this will cause minimal disruption to your daily schedule and will provide as much efficiency as possible in completing your denture treatment. Office hours are by appointment only. This office provides private, personal denture care. Appointment time is reserved for you alone. When you make an appointment with us, please be sure that you will be able to keep it. We understand that emergencies and unforeseen treatment problems may arise, causing schedule changes. We always try our best to ensure these circumstances do not inconvenience other patients and we appreciate your understanding of those situations. As a courtesy, our office will call in an attempt to confirm your appointment the day before it is scheduled (we call on Friday for Monday appointments). If you cannot make an appointment as scheduled, please notify the office. Please be aware that if you arrive more than 15 minutes late to your scheduled appointment you may be asked to reschedule. There will be a charge of $75 for missed appointments or appointments that are not canceled with more than a 24 hour notice. Patients who break appointments may also be required to prepay for future treatment. If you have any questions about our appointment cancellation policy, please let us know!', 'cancellationAgree']
+      ], true);
+      addSection('Acknowledgements', [
+        ['Financial Arrangements Agreed', data.financialAgree || 'No'],
+        ['Insurance Claims and Billing Authorized', data.insuranceAgree || 'No'],
+        ['Patient Rights Acknowledged', data.patientRightsAgree || 'No'],
+        ['Notice of Privacy Practices Received', data.privacyNoticeAgree || 'No'],
+        ['Cancellation Policy Acknowledged', data.cancellationAgree || 'No']
+      ]);
+      addSection('Acknowledgement of Receipt', [
+        ['Signature', data.signature],
+        ['Date', data.signatureDate]
+      ]);
+      if (doc.getNumberOfPages() > 1 && y < 100) {
+        doc.deletePage(doc.getNumberOfPages());
+      }
+      doc.save(`submission_${data.name}_${Date.now()}.pdf`);
+      const json = JSON.stringify(data);
+      const jsonBlob = new Blob([json], { type: 'application/json' });
+      const jsonUrl = URL.createObjectURL(jsonBlob);
+      const jsonA = document.createElement('a');
+      jsonA.href = jsonUrl;
+      jsonA.download = `submission_${data.name}_${Date.now()}.json`;
+      jsonA.click();
+      URL.revokeObjectURL(jsonUrl);
+      const csv = Object.entries(data).map(([key, value]) => `"${key}","${value}"`).join('\n');
+      const csvBlob = new Blob([csv], { type: 'text/csv' });
+      const csvUrl = URL.createObjectURL(csvBlob);
+      const csvA = document.createElement('a');
+      csvA.href = csvUrl;
+      csvA.download = `submission_${data.name}_${Date.now()}.csv`;
+      csvA.click();
+      URL.revokeObjectURL(csvUrl);
+      let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+      submissions.push(data);
+      localStorage.setItem('submissions', JSON.stringify(submissions));
+      alert('Submission successful! Files have been saved to your Downloads folder and will be moved to OneDrive/DENTURE_SPECIALIST_SCAN_DATA automatically.');
+      localStorage.removeItem('submissions');
+    });
+  </script>
+</body>
+</html>
